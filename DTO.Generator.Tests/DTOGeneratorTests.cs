@@ -13,7 +13,7 @@ namespace DTO.Generator.Tests
             var source = @"
                 namespace Test;
 
-                public interface IThing { 
+                public interface IValueTypeThing { 
                     public bool Flag { get; } 
                 }
             ";
@@ -28,9 +28,9 @@ namespace DTO.Generator.Tests
                 namespace Test;
 
                 public record Test(string other);    
-                public interface IThing { 
+                public interface IRefTypeThing { 
                     public bool Flag { get; }
-                    public Test teste { get; }
+                    public Test Test { get; }
                 }
             ";
 
@@ -45,13 +45,37 @@ namespace DTO.Generator.Tests
                 namespace Test;
 
                 public record Test(string other);    
-                public interface IThing { 
+                public interface IValueTypeAndProtectedRef { 
                     public bool Flag { get; }
-                    protected Test teste { get; }
+                    protected Test Test { get; }
                 }
             ";
 
             return TestHelper.Verify(source);
+        }
+
+
+        [Fact]
+        public Task test_attribute_settings()
+        {
+            var settings = new DTOGeneratorSettings();
+            settings.Generate = GenerateMode.Attribute;
+
+            var source = @"
+                using DTO.Generator;
+                namespace Test;
+
+                public interface IShoudNeverGenerate { 
+                    public bool Flag { get; } 
+                }
+
+                [DTO]
+                public interface IValueTypeThing { 
+                    public bool Flag { get; } 
+                }
+            ";
+
+            return TestHelper.Verify(source, settings);
         }
     }
 }

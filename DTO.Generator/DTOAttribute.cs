@@ -3,7 +3,7 @@
 namespace DTO.Generator
 {
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-    public class DTOGeneratorAttribute : Attribute
+    public class DTOAttribute : Attribute
     {
     }
 }

@@ -6,19 +6,22 @@ using VerifyXunit;
 
 namespace DTO.Generator.Tests
 {
-    public static class TestHelper
+    internal static class TestHelper
     {
-        private static readonly IConfiguration configuration =
+        private static readonly IConfiguration _configuration =
             new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-        public static Task Verify(string source, IConfiguration configuration)
+        public static Task Verify(string source, DTOGeneratorSettings? settings = null)
         {
-            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
-            CSharpCompilation compilation = CSharpCompilation.Create(
+            var syntaxTree = CSharpSyntaxTree.ParseText(source);
+            var compilation = CSharpCompilation.Create(
                 assemblyName: "Tests",
                 syntaxTrees: new[] { syntaxTree });
 
-            var generator = new DTOGenerator(configuration);
+            settings ??= _configuration.Get<DTOGeneratorSettings>();
+            _configuration.Bind(settings);
+
+            var generator = new DTOGenerator(settings);
             GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
             driver = driver.RunGenerators(compilation);
 
@@ -27,7 +30,7 @@ namespace DTO.Generator.Tests
 
         public static Task Verify(string source)
         {
-            return Verify(source, configuration);
+            return Verify(source, null);
         }
     }
 }

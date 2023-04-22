@@ -7,18 +7,17 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.Configuration;
 
 namespace DTO.Generator
 {
     [Generator]
     public class DTOGenerator : IIncrementalGenerator
     {
-        private readonly IConfiguration _configuration;
+        private readonly DTOGeneratorSettings _settings;
 
-        public DTOGenerator(IConfiguration configuration)
+        public DTOGenerator(DTOGeneratorSettings settings)
         {
-            _configuration = configuration;
+            _settings = settings;
         }
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -39,75 +38,89 @@ namespace DTO.Generator
         {
             var sb = new StringBuilder(1024);
             var namespaces = new Dictionary<string, string>();
-            foreach (var typeDeclaration in typeDeclarationSyntaxProvider)
+            foreach (var typeDeclaration in typeDeclarationSyntaxProvider.Where(typeDeclaration =>
+                         typeDeclaration.Kind() == SyntaxKind.InterfaceDeclaration))
             {
-                if (typeDeclaration.Kind() == SyntaxKind.InterfaceDeclaration)
+                var interfaceDeclaration = (InterfaceDeclarationSyntax)typeDeclaration;
+                if (_settings.Generate.Equals(GenerateMode.Attribute))
                 {
-                    var justValueTypes = !typeDeclaration.Members
-                        .Where(member => member is PropertyDeclarationSyntax)
-                        .Where(member => member.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword)))
-                        .Any(member => ((PropertyDeclarationSyntax)member).Type is IdentifierNameSyntax);
-
-                    var interfaceDeclaration = (InterfaceDeclarationSyntax)typeDeclaration;
-                    var interfaceNamespaceIdentifier =
-                        (IdentifierNameSyntax?)interfaceDeclaration.Ancestors()
-                            .OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name
-                        ?? (IdentifierNameSyntax?)interfaceDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>()
-                            .FirstOrDefault()?.Name;
-                    var @namespace = interfaceNamespaceIdentifier?.Identifier.ValueText;
-                    var interfaceName = typeDeclaration.Identifier.ValueText;
-                    var generatedRecordName = generateRecordName(typeDeclaration, interfaceName);
-                    if (justValueTypes)
+                    foreach (var attributeList in interfaceDeclaration.AttributeLists)
                     {
-                        sb.Append("public readonly record struct ");
-                    }
-                    else
-                    {
-                        sb.Append("public record ");
-                    }
-
-                    sb.Append(generatedRecordName).Append('(');
-
-                    var hasMoreThanOneProperty = false;
-                    foreach (var declarationMember in typeDeclaration.Members)
-                    {
-                        if (declarationMember.IsKind(SyntaxKind.PropertyDeclaration))
+                        foreach (var attributeSyntax in attributeList.Attributes)
                         {
-                            var propertyTree = (PropertyDeclarationSyntax)declarationMember;
-                            if (!declarationMember.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword)))
-                                continue;
-
-                            if (hasMoreThanOneProperty)
-                                sb.Append(", ");
-
-                            hasMoreThanOneProperty = true;
-                            var typeAnnotation = GetTypeToRawString(propertyTree.Type);
-                            var identifierText = GetIdentifierName(propertyTree);
-                            sb.Append(typeAnnotation);
-                            sb.Append(" ");
-                            sb.Append(identifierText);
+                            var name = (IdentifierNameSyntax)attributeSyntax.Name;
+                            if (name.Identifier.ValueText.Equals("DTO"))
+                                goto generate;
                         }
                     }
 
-                    sb.Append(");\n");
-                    if (@namespace is not null)
-                    {
-                        var source = sb.ToString();
-                        if (namespaces.TryGetValue(@namespace, out var value))
-                        {
-                            source += value;
-                            namespaces.Remove(@namespace);
-                        }
-
-                        namespaces.Add(@namespace, source);
-                    }
-                    else
-                    {
-                        spc.AddSource(@namespace + ".generated.cs", sb.ToString());
-                    }
-
-                    sb.Clear();
+                    continue;
                 }
+
+                generate:
+                var justValueTypes = !typeDeclaration.Members
+                    .Where(member => member is PropertyDeclarationSyntax)
+                    .Where(member => member.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword)))
+                    .Any(member => ((PropertyDeclarationSyntax)member).Type is IdentifierNameSyntax);
+
+                var interfaceNamespaceIdentifier =
+                    (IdentifierNameSyntax?)interfaceDeclaration.Ancestors()
+                        .OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name
+                    ?? (IdentifierNameSyntax?)interfaceDeclaration.Ancestors().OfType<NamespaceDeclarationSyntax>()
+                        .FirstOrDefault()?.Name;
+                var @namespace = interfaceNamespaceIdentifier?.Identifier.ValueText;
+                var interfaceName = typeDeclaration.Identifier.ValueText;
+                var generatedRecordName = generateRecordName(interfaceName);
+                if (justValueTypes && !_settings.TypeGenerated.Equals(TypeGenerated.Record))
+                {
+                    sb.Append("public readonly record struct ");
+                }
+                else
+                {
+                    sb.Append("public record ");
+                }
+
+                sb.Append(generatedRecordName).Append('(');
+
+                var hasMoreThanOneProperty = false;
+                foreach (var declarationMember in typeDeclaration.Members)
+                {
+                    if (declarationMember.IsKind(SyntaxKind.PropertyDeclaration))
+                    {
+                        var propertyTree = (PropertyDeclarationSyntax)declarationMember;
+                        if (!declarationMember.Modifiers.Any(x => x.IsKind(SyntaxKind.PublicKeyword)))
+                            continue;
+
+                        if (hasMoreThanOneProperty)
+                            sb.Append(", ");
+
+                        hasMoreThanOneProperty = true;
+                        var typeAnnotation = GetTypeToRawString(propertyTree.Type);
+                        var identifierText = GetIdentifierName(propertyTree);
+                        sb.Append(typeAnnotation);
+                        sb.Append(" ");
+                        sb.Append(identifierText);
+                    }
+                }
+
+                sb.Append(");\n");
+                if (@namespace is not null)
+                {
+                    var source = sb.ToString();
+                    if (namespaces.TryGetValue(@namespace, out var value))
+                    {
+                        source += value;
+                        namespaces.Remove(@namespace);
+                    }
+
+                    namespaces.Add(@namespace, source);
+                }
+                else
+                {
+                    spc.AddSource(@namespace + ".generated.cs", sb.ToString());
+                }
+
+                sb.Clear();
             }
 
             foreach (var entry in namespaces)
@@ -117,19 +130,18 @@ namespace DTO.Generator
             }
         }
 
-        private static string generateRecordName(TypeDeclarationSyntax typeDeclaration, string interfaceName)
+        private string generateRecordName(string interfaceName)
         {
-            if (interfaceName.Length > 1 && interfaceName.StartsWith("I"))
+            var match = _settings.NamingConvention.Interface.Match(interfaceName);
+            if (match.Success)
             {
-                return typeDeclaration.Identifier.ValueText.Substring(1);
+                return _settings.NamingConvention.Generated.Replace("{Name}", match.Groups[1].Value);
             }
-            else
-            {
-                return interfaceName + "Generated";
-            }
+
+            return interfaceName + "Generated";
         }
 
-        private static string GetTypeToRawString(SyntaxNode syntaxNode)
+        private string GetTypeToRawString(SyntaxNode syntaxNode)
         {
             return syntaxNode switch
             {
