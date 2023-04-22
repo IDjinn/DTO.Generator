@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO.Generator", "DTO.Generator\DTO.Generator.csproj", "{AC006F86-80A2-4007-9C66-D8CC72DBC271}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTO.Generator.Tests", "DTO.Generator.Tests\DTO.Generator.Tests.csproj", "{E6E8A231-24FC-47B6-A75B-16202CD0B09E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DTO", "DTO", "{5C869C51-521F-4FE1-8F18-5950C75A3C7B}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AC006F86-80A2-4007-9C66-D8CC72DBC271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC006F86-80A2-4007-9C66-D8CC72DBC271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC006F86-80A2-4007-9C66-D8CC72DBC271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC006F86-80A2-4007-9C66-D8CC72DBC271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6E8A231-24FC-47B6-A75B-16202CD0B09E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6E8A231-24FC-47B6-A75B-16202CD0B09E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6E8A231-24FC-47B6-A75B-16202CD0B09E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6E8A231-24FC-47B6-A75B-16202CD0B09E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {11CAB502-146E-4301-BA4E-A54DA418BE64}
+	EndGlobalSection
+EndGlobal
