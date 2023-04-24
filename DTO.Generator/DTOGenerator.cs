@@ -89,7 +89,10 @@ namespace DTO.Generator
                         }
                     }
 
-                    sb.Append(");\n");
+                    sb.Append(") : ")
+                        .Append(interfaceName)
+                        .Append(";\n");
+
                     if (@namespace is not null)
                     {
                         var source = sb.ToString();
