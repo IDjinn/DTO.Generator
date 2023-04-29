@@ -6,6 +6,7 @@
 		<LangVersion>latest</LangVersion>
 		<EmitCompilerGeneratedFiles>True</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+		<Version>1.2.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

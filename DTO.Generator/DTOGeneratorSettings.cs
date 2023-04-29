@@ -27,7 +27,7 @@ namespace DTO.Generator
         public GenerateMode Generate { get; set; } = GenerateMode.All;
         public TypeGenerated TypeGenerated { get; set; } = TypeGenerated.Auto;
 
-        public NamingConvention NamingConvention { get; set; } = new NamingConvention()
+        public NamingConvention NamingConvention { get; set; } = new()
         {
             Interface = new Regex(@"^I([\w]+)"),
             Generated = "{Name}"
