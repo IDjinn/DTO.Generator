@@ -7,6 +7,13 @@
 		<EmitCompilerGeneratedFiles>True</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
 		<Version>1.2.0</Version>
+		<StripSymbols>true</StripSymbols>
+		<PackageId>DTO.Generator</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>IDjinn</Authors>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageProjectUrl>https://github.com/IDjinn/DTO.Generator</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/IDjinn/DTO.Generator</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,7 +28,4 @@
 		<PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1"/>
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Include="$(OutputPath)\netstandard2.0\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
-	</ItemGroup>
 </Project>
